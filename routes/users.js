@@ -18,9 +18,12 @@ router.get('/', passport.authenticate('jwt', { session: false }), async (req, re
 router.get('/:id', passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
     const { id } = req.params;
-    if (req.user.role !== 'admin' && req.user._id.toString() !== id) return res.status(403).json({ error: 'Acceso denegado' });
+    if (req.user.role !== 'admin' && req.user._id.toString() !== id)
+      return res.status(403).json({ error: 'Acceso denegado' });
+
     const user = await User.findById(id).select('-password');
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+
     res.json(user);
   } catch (err) {
     console.error(`Error en GET /users/${req.params.id}:`, err);
@@ -31,7 +34,8 @@ router.get('/:id', passport.authenticate('jwt', { session: false }), async (req,
 router.put('/:id', passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
     const { id } = req.params;
-    if (req.user.role !== 'admin' && req.user._id.toString() !== id) return res.status(403).json({ error: 'Acceso denegado' });
+    if (req.user.role !== 'admin' && req.user._id.toString() !== id)
+      return res.status(403).json({ error: 'Acceso denegado' });
 
     const allowedFields = ['first_name', 'last_name', 'age', 'password'];
     const update = {};
@@ -41,7 +45,8 @@ router.put('/:id', passport.authenticate('jwt', { session: false }), async (req,
     });
 
     if (update.password) {
-      update.password = bcrypt.hashSync(update.password, 10);
+      const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || '10');
+      update.password = bcrypt.hashSync(update.password, saltRounds);
     }
 
     if (req.body.role && req.user.role === 'admin') update.role = req.body.role;
@@ -59,7 +64,8 @@ router.put('/:id', passport.authenticate('jwt', { session: false }), async (req,
 router.delete('/:id', passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
     const { id } = req.params;
-    if (req.user.role !== 'admin' && req.user._id.toString() !== id) return res.status(403).json({ error: 'Acceso denegado' });
+    if (req.user.role !== 'admin' && req.user._id.toString() !== id)
+      return res.status(403).json({ error: 'Acceso denegado' });
 
     const user = await User.findByIdAndDelete(id).select('-password');
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });

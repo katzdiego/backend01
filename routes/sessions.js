@@ -3,14 +3,13 @@ const router = express.Router();
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const UserDTO = require('../dto/UserDTO');
 
 router.post('/register', async (req, res) => {
   try {
     const { first_name, last_name, email, age, password } = req.body;
-
-    if (!first_name || !last_name || !email || !password) {
+    if (!first_name || !last_name || !email || !password)
       return res.status(400).json({ error: 'Faltan datos requeridos' });
-    }
 
     const exists = await User.findOne({ email });
     if (exists) return res.status(409).json({ error: 'Email ya registrado' });
@@ -20,14 +19,12 @@ router.post('/register', async (req, res) => {
 
     const user = newUser.toObject();
     delete user.password;
-
     res.status(201).json({ message: 'Usuario creado', user });
   } catch (err) {
     console.error('Error en /register:', err);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
-
 
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', { session: false }, (err, user, info) => {
@@ -50,9 +47,14 @@ router.post('/login', (req, res, next) => {
 });
 
 router.get('/current', passport.authenticate('jwt', { session: false }), (req, res) => {
-  const user = req.user.toObject();
-  delete user.password;
-  res.json({ user });
+  try {
+    if (!req.user) return res.status(401).json({ error: 'No autenticado' });
+    const userDTO = new UserDTO(req.user);
+    res.json({ user: userDTO });
+  } catch (err) {
+    console.error('Error en /current:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
 });
 
 module.exports = router;
