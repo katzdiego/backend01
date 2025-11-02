@@ -1,6 +1,6 @@
-import Product from '../models/Product.js';
+const Product = require('../models/Product');
 
-export default class ProductRepository {
+class ProductRepository {
     async getById(id) {
         return await Product.findById(id);
     }
@@ -21,3 +21,5 @@ export default class ProductRepository {
         return await Product.findByIdAndDelete(id);
     }
 }
+
+module.exports = ProductRepository; 

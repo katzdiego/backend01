@@ -6,7 +6,9 @@ const cookieParser = require('cookie-parser');
 
 const sessionsRouter = require('./routes/sessions');
 const usersRouter = require('./routes/users');
-const passwordRouter = require('./routes/password'); // 🔹 nuevo
+const passwordRouter = require('./routes/password');
+const productsRouter = require('./routes/products');
+
 const { initPassport } = require('./config/passport');
 
 const app = express();
@@ -22,6 +24,7 @@ app.use(passport.initialize());
 app.use('/api/sessions', sessionsRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/password', passwordRouter);
+app.use('/api/products', productsRouter);
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB conectado'))
